@@ -4,7 +4,11 @@ import jieba
 import pypinyin
 
 from .pinyinToPhonemes import PINYIN_DICT
+from pypinyin_dict.pinyin_data import kxhc1983
 
+
+def enhance_dict():
+    kxhc1983.load()
 
 def _chinese_character_to_pinyin(text: str) -> List[str]:
     pinyins = pypinyin.pinyin(text, style=pypinyin.Style.TONE3, heteronym=False, neutral_tone_with_five=True)

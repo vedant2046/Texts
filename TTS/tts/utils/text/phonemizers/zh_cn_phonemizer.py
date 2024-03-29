@@ -1,6 +1,6 @@
 from typing import Dict
 
-from TTS.tts.utils.text.chinese_mandarin.phonemizer import chinese_text_to_phonemes
+from TTS.tts.utils.text.chinese_mandarin.phonemizer import chinese_text_to_phonemes, enhance_dict
 from TTS.tts.utils.text.phonemizers.base import BasePhonemizer
 
 _DEF_ZH_PUNCS = "、.,[]()?!〽~『』「」【】"
@@ -27,6 +27,7 @@ class ZH_CN_Phonemizer(BasePhonemizer):
 
     def __init__(self, punctuations=_DEF_ZH_PUNCS, keep_puncs=False, **kwargs):  # pylint: disable=unused-argument
         super().__init__(self.language, punctuations=punctuations, keep_puncs=keep_puncs)
+        enhance_dict()
 
     @staticmethod
     def name():

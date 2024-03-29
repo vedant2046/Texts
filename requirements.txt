@@ -34,6 +34,7 @@ coqpit>=0.0.16
 # chinese g2p deps
 jieba
 pypinyin
+pypinyin-dict
 # korean
 hangul_romanize
 # gruut+supported langs
