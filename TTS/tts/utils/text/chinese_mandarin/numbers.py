@@ -27,6 +27,11 @@ def _num2chinese(num: str, big=False, simp=True, o=False, twoalt=False) -> str:
         str: converted number as hanzi characters
     """
 
+    # handling percentage
+    is_percentage = num.endswith("%")
+    if is_percentage:
+        num = num[:-1]
+
     # check num first
     nd = str(num)
     if abs(float(nd)) >= 1e48:
@@ -98,6 +103,10 @@ def _num2chinese(num: str, big=False, simp=True, o=False, twoalt=False) -> str:
     if remainder:
         result.append(c_symbol[2])
         result.append("".join(c_basic[int(ch)] for ch in remainder))
+        
+    # Append percentage symbol if applicable
+    if is_percentage:
+        result = ["百分之"] + result
     return "".join(result)
 
 
@@ -110,7 +119,7 @@ def _number_replace(match) -> str:
     Returns:
         str: replaced characters for the numbers
     """
-    match_str: str = match.group()
+    match_str: str = match.group().replace(",", "")
     return _num2chinese(match_str)
 
 
@@ -123,5 +132,5 @@ def replace_numbers_to_characters_in_text(text: str) -> str:
     Returns:
         str: output text
     """
-    text = re.sub(r"[0-9]+", _number_replace, text)
+    text = re.sub(r"[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?%?", _number_replace, text)
     return text
