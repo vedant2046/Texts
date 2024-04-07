@@ -265,6 +265,7 @@ class Synthesizer(nn.Module):
         reference_wav=None,
         reference_speaker_name=None,
         split_sentences: bool = True,
+        speed=1.0,
         **kwargs,
     ) -> List[int]:
         """🐸 TTS magic. Run all the models and generate speech.
@@ -335,7 +336,7 @@ class Synthesizer(nn.Module):
         # handle multi-lingual
         language_id = None
         if self.tts_languages_file or (
-            hasattr(self.tts_model, "language_manager") 
+            hasattr(self.tts_model, "language_manager")
             and self.tts_model.language_manager is not None
             and not self.tts_config.model == "xtts"
         ):
@@ -391,6 +392,7 @@ class Synthesizer(nn.Module):
                         d_vector=speaker_embedding,
                         speaker_wav=speaker_wav,
                         language=language_name,
+                        speed=1.0,
                         **kwargs,
                     )
                 else:

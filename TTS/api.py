@@ -168,9 +168,7 @@ class TTS(nn.Module):
         self.synthesizer = None
         self.model_name = model_name
 
-        model_path, config_path, vocoder_path, vocoder_config_path, model_dir = self.download_model_by_name(
-            model_name
-        )
+        model_path, config_path, vocoder_path, vocoder_config_path, model_dir = self.download_model_by_name(model_name)
 
         # init synthesizer
         # None values are fetch from the model
@@ -283,6 +281,7 @@ class TTS(nn.Module):
             style_text=None,
             reference_speaker_name=None,
             split_sentences=split_sentences,
+            speed=1.0,
             **kwargs,
         )
         return wav
@@ -337,6 +336,7 @@ class TTS(nn.Module):
             language=language,
             speaker_wav=speaker_wav,
             split_sentences=split_sentences,
+            speed=1.0,
             **kwargs,
         )
         self.synthesizer.save_wav(wav=wav, path=file_path, pipe_out=pipe_out)
