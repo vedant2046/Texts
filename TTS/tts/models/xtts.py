@@ -424,7 +424,6 @@ class Xtts(BaseTTS):
         text,
         ref_audio_path,
         language,
-        speed,
         # GPT inference
         temperature=0.75,
         length_penalty=1.0,
@@ -437,6 +436,7 @@ class Xtts(BaseTTS):
         gpt_cond_chunk_len=6,
         max_ref_len=10,
         sound_norm_refs=False,
+        speed=1.0,
         **hf_generate_kwargs,
     ):
         """
