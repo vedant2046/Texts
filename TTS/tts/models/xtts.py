@@ -759,7 +759,7 @@ class Xtts(BaseTTS):
 
         model_path = checkpoint_path or os.path.join(checkpoint_dir, "model.pth")
         vocab_path = vocab_path or os.path.join(checkpoint_dir, "vocab.json")
-        
+
         if speaker_file_path is None and checkpoint_dir is not None:
             speaker_file_path = os.path.join(checkpoint_dir, "speakers_xtts.pth")
 
