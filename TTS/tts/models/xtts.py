@@ -766,6 +766,7 @@ class Xtts(BaseTTS):
         self.language_manager = LanguageManager(config)
         self.speaker_manager = None
         if speaker_file_path is not None and os.path.exists(speaker_file_path):
+            self.speaker_manager = SpeakerManager(speaker_file_path)
 
         if os.path.exists(vocab_path):
             self.tokenizer = VoiceBpeTokenizer(vocab_file=vocab_path)
