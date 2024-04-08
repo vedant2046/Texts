@@ -392,7 +392,7 @@ class Synthesizer(nn.Module):
                         d_vector=speaker_embedding,
                         speaker_wav=speaker_wav,
                         language=language_name,
-                        speed=1.0,
+                        speed=speed,
                         **kwargs,
                     )
                 else:
