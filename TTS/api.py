@@ -124,7 +124,7 @@ class TTS(nn.Module):
 
     @staticmethod
     def list_models():
-        return ModelManager(models_file=TTS.get_models_file_path(), progress_bar=False, verbose=False)
+        return ModelManager(models_file=TTS.get_models_file_path(), progress_bar=False, verbose=False).list_models()
 
     def download_model_by_name(self, model_name: str):
         model_path, config_path, model_item = self.manager.download_model(model_name)
