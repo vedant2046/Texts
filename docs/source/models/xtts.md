@@ -220,7 +220,7 @@ torchaudio.save("xtts.wav", torch.tensor(out["wav"]).unsqueeze(0), 24000)
 ```
 
 
-##### Streaming manually
+##### Streaming inference
 
 Here the goal is to stream the audio as it is being generated. This is useful for real-time applications.
 Streaming inference is typically slower than regular inference, but it allows to get a first chunk of audio faster.
@@ -253,16 +253,50 @@ chunks = model.inference_stream(
     speaker_embedding
 )
 
-wav_chuncks = []
+wav_chunks = []
 for i, chunk in enumerate(chunks):
     if i == 0:
         print(f"Time to first chunck: {time.time() - t0}")
     print(f"Received chunk {i} of audio length {chunk.shape[-1]}")
-    wav_chuncks.append(chunk)
-wav = torch.cat(wav_chuncks, dim=0)
+    wav_chunks.append(chunk)
+wav = torch.cat(wav_chunks, dim=0)
 torchaudio.save("xtts_streaming.wav", wav.squeeze().unsqueeze(0).cpu(), 24000)
 ```
 
+If you also need to do text-streaming you can use `inference_stream_text`, like so:
+
+```python
+# ...same setup as before
+
+def text_streaming_generator():
+    yield "It took me quite a long time to develop a voice and now that I have it I am not going to be silent."
+    yield "Having discovered not just one, but many voices, I will champion each."
+
+print("Inference with text streaming...")
+
+text_gen = text_streaming_generator()
+inf_gen = model.inference_stream_text(
+    "en",
+    gpt_cond_latent,
+    speaker_embedding
+)
+
+wav_chunks = []
+for text in text_gen:
+    # Add text progressively
+    model.inference_add_text(text, enable_text_splitting=True)
+    for chunk in enumerate(inf_gen):
+        if chunk is None:
+            break # all chunks generated for the current text
+        print(f"Received chunk {len(wav_chunks)} of audio length {chunk.shape[-1]}")
+        wav_chunks.append(chunk)
+
+# Call finalize to discard the inference generator
+model.inference_finalize_text()
+
+wav = torch.cat(wav_chunks, dim=0)
+torchaudio.save("xtts_streaming_text.wav", wav.squeeze().unsqueeze(0).cpu(), 24000)
+```
 
 ### Training
 
