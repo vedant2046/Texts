@@ -183,10 +183,12 @@ class NewGenerationMixin(GenerationMixin):
         requires_attention_mask = "encoder_outputs" not in model_kwargs
 
         if model_kwargs.get("attention_mask", None) is None and requires_attention_mask and accepts_attention_mask:
+            pad_token_tensor = torch.tensor([generation_config.pad_token_id], device=inputs_tensor.device) if generation_config.pad_token_id is not None else None
+            eos_token_tensor = torch.tensor([generation_config.eos_token_id], device=inputs_tensor.device) if generation_config.eos_token_id is not None else None
             model_kwargs["attention_mask"] = self._prepare_attention_mask_for_generation(
                 inputs_tensor,
-                generation_config.pad_token_id,
-                generation_config.eos_token_id,
+                pad_token_tensor,
+                eos_token_tensor,
             )
 
         # decoder-only models should use left-padding for generation
