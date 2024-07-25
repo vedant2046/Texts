@@ -24,6 +24,7 @@ from transformers import (
 from transformers.generation.stopping_criteria import validate_stopping_criteria
 from transformers.generation.utils import GenerateOutput, SampleOutput, logger
 
+
 def setup_seed(seed: int) -> None:
     if seed == -1:
         return
