@@ -88,7 +88,7 @@ class TTS(nn.Module):
 
     @property
     def is_multi_speaker(self):
-        if hasattr(self.synthesizer.tts_model, "speaker_manager") and self.synthesizer.tts_model.speaker_manager:
+        if hasattr(self.synthesizer.tts_model, "speaker_Smanager") and self.synthesizer.tts_model.speaker_manager:
             return self.synthesizer.tts_model.speaker_manager.num_speakers > 1
         return False
 
@@ -243,6 +243,7 @@ class TTS(nn.Module):
         emotion: str = None,
         speed: float = None,
         split_sentences: bool = True,
+        SuppresPrintStatements: bool = False,
         **kwargs,
     ):
         """Convert text to speech.
@@ -267,6 +268,9 @@ class TTS(nn.Module):
                 Split text into sentences, synthesize them separately and concatenate the file audio.
                 Setting it False uses more VRAM and possibly hit model specific text length or VRAM limits. Only
                 applicable to the 🐸TTS models. Defaults to True.
+            SuppresPrintStatements (bool, optional):
+                Suppress All the Print statements so that when runnging the function in thread the print statement will not apears in the terminal.
+                Setting it to True will suppress the print statements
             kwargs (dict, optional):
                 Additional arguments for the model.
         """
@@ -283,6 +287,7 @@ class TTS(nn.Module):
             style_text=None,
             reference_speaker_name=None,
             split_sentences=split_sentences,
+            SuppresPrintStatements=SuppresPrintStatements,
             **kwargs,
         )
         return wav
