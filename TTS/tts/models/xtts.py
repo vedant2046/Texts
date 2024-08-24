@@ -1,19 +1,23 @@
+import logging
 import os
 from dataclasses import dataclass
+from pathlib import Path
 
 import librosa
 import torch
 import torch.nn.functional as F
 import torchaudio
 from coqpit import Coqpit
+from trainer.io import load_fsspec
 
 from TTS.tts.layers.xtts.gpt import GPT
 from TTS.tts.layers.xtts.hifigan_decoder import HifiDecoder
 from TTS.tts.layers.xtts.stream_generator import init_stream_support
 from TTS.tts.layers.xtts.tokenizer import VoiceBpeTokenizer, split_sentence
-from TTS.tts.layers.xtts.xtts_manager import SpeakerManager, LanguageManager
+from TTS.tts.layers.xtts.xtts_manager import LanguageManager, SpeakerManager
 from TTS.tts.models.base_tts import BaseTTS
-from TTS.utils.io import load_fsspec
+
+logger = logging.getLogger(__name__)
 
 init_stream_support()
 
@@ -82,7 +86,7 @@ def load_audio(audiopath, sampling_rate):
     # Check some assumptions about audio range. This should be automatically fixed in load_wav_to_torch, but might not be in some edge cases, where we should squawk.
     # '10' is arbitrarily chosen since it seems like audio will often "overdrive" the [-1,1] bounds.
     if torch.any(audio > 10) or not torch.any(audio < 0):
-        print(f"Error with {audiopath}. Max={audio.max()} min={audio.min()}")
+        logger.error("Error with %s. Max=%.2f min=%.2f", audiopath, audio.max(), audio.min())
     # clip audio invalid values
     audio.clip_(-1, 1)
     return audio
@@ -197,7 +201,7 @@ class Xtts(BaseTTS):
         >>> from TTS.tts.configs.xtts_config import XttsConfig
         >>> from TTS.tts.models.xtts import Xtts
         >>> config = XttsConfig()
-        >>> model = Xtts.inif_from_config(config)
+        >>> model = Xtts.init_from_config(config)
         >>> model.load_checkpoint(config, checkpoint_dir="paths/to/models_dir/", eval=True)
     """
 
@@ -274,7 +278,7 @@ class Xtts(BaseTTS):
             for i in range(0, audio.shape[1], 22050 * chunk_length):
                 audio_chunk = audio[:, i : i + 22050 * chunk_length]
 
-                # if the chunk is too short ignore it 
+                # if the chunk is too short ignore it
                 if audio_chunk.size(-1) < 22050 * 0.33:
                     continue
 
@@ -410,12 +414,14 @@ class Xtts(BaseTTS):
         if speaker_id is not None:
             gpt_cond_latent, speaker_embedding = self.speaker_manager.speakers[speaker_id].values()
             return self.inference(text, language, gpt_cond_latent, speaker_embedding, **settings)
-        settings.update({
-            "gpt_cond_len": config.gpt_cond_len,
-            "gpt_cond_chunk_len": config.gpt_cond_chunk_len,
-            "max_ref_len": config.max_ref_len,
-            "sound_norm_refs": config.sound_norm_refs,
-        })
+        settings.update(
+            {
+                "gpt_cond_len": config.gpt_cond_len,
+                "gpt_cond_chunk_len": config.gpt_cond_chunk_len,
+                "max_ref_len": config.max_ref_len,
+                "sound_norm_refs": config.sound_norm_refs,
+            }
+        )
         return self.full_inference(text, speaker_wav, language, **settings)
 
     @torch.inference_mode()
@@ -693,12 +699,12 @@ class Xtts(BaseTTS):
 
     def forward(self):
         raise NotImplementedError(
-            "XTTS has a dedicated trainer, please check the XTTS docs: https://tts.readthedocs.io/en/dev/models/xtts.html#training"
+            "XTTS has a dedicated trainer, please check the XTTS docs: https://coqui-tts.readthedocs.io/en/latest/models/xtts.html#training"
         )
 
     def eval_step(self):
         raise NotImplementedError(
-            "XTTS has a dedicated trainer, please check the XTTS docs: https://tts.readthedocs.io/en/dev/models/xtts.html#training"
+            "XTTS has a dedicated trainer, please check the XTTS docs: https://coqui-tts.readthedocs.io/en/latest/models/xtts.html#training"
         )
 
     @staticmethod
@@ -755,12 +761,18 @@ class Xtts(BaseTTS):
         """
 
         model_path = checkpoint_path or os.path.join(checkpoint_dir, "model.pth")
-        vocab_path = vocab_path or os.path.join(checkpoint_dir, "vocab.json")
-        speaker_file_path = speaker_file_path or os.path.join(checkpoint_dir, "speakers_xtts.pth")
+        if vocab_path is None:
+            if checkpoint_dir is not None and (Path(checkpoint_dir) / "vocab.json").is_file():
+                vocab_path = str(Path(checkpoint_dir) / "vocab.json")
+            else:
+                vocab_path = config.model_args.tokenizer_file
+
+        if speaker_file_path is None and checkpoint_dir is not None:
+            speaker_file_path = os.path.join(checkpoint_dir, "speakers_xtts.pth")
 
         self.language_manager = LanguageManager(config)
         self.speaker_manager = None
-        if os.path.exists(speaker_file_path):
+        if speaker_file_path is not None and os.path.exists(speaker_file_path):
             self.speaker_manager = SpeakerManager(speaker_file_path)
 
         if os.path.exists(vocab_path):
@@ -785,5 +797,5 @@ class Xtts(BaseTTS):
 
     def train_step(self):
         raise NotImplementedError(
-            "XTTS has a dedicated trainer, please check the XTTS docs: https://tts.readthedocs.io/en/dev/models/xtts.html#training"
+            "XTTS has a dedicated trainer, please check the XTTS docs: https://coqui-tts.readthedocs.io/en/latest/models/xtts.html#training"
         )
