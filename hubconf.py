@@ -10,7 +10,7 @@ from TTS.utils.synthesizer import Synthesizer
 def tts(model_name='tts_models/en/ljspeech/tacotron2-DCA',
         vocoder_name=None,
         use_cuda=False):
-    """TTS entry point for PyTorch Hub that provides a Synthesizer object to synthesize speech from a give text.
+    """TTS entry point for PyTorch Hub that provides a Synthesizer object to synthesize speech from a given text.
 
     Example:
         >>> synthesizer = torch.hub.load('coqui-ai/TTS', 'tts', source='github')
