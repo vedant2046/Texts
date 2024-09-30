@@ -28,7 +28,7 @@ class BaseTrainerModel(TrainerModel):
         """Forward pass for inference.
 
         It must return a dictionary with the main model output and all the auxiliary outputs. The key ```model_outputs```
-        is considered to be the main output and you can add any other auxiliary outputs as you want.
+        is considered to be the main output and you can add any other auxiliary outputs if you want.
 
         We don't use `*kwargs` since it is problematic with the TorchScript API.
 
@@ -54,6 +54,7 @@ class BaseTrainerModel(TrainerModel):
             checkpoint_path (str): Path to the model checkpoint file.
             eval (bool, optional): If true, init model for inference else for training. Defaults to False.
             strict (bool, optional): Match all checkpoint keys to model's keys. Defaults to True.
-            cache (bool, optional): If True, cache the file locally for subsequent calls. It is cached under `get_user_data_dir()/tts_cache`. Defaults to False.
+            cache (bool, optional): If True, cache the file locally for subsequent calls. It is cached under `get_user_data_dir()/tts_cache`. 
+            Defaults to False.
         """
         ...
